@@ -4,9 +4,20 @@ uniform float grid_size = 2.0;
 uniform float blur_level = 0.0;
 uniform float dot_size = 1.0;
 
-mat2 rotate2d(float _angle){
-    return mat2(vec2(cos(_angle),-sin(_angle)),
-                vec2(sin(_angle),cos(_angle)));
+uniform bool Cyan = true;
+uniform bool Magenta = true;
+uniform bool Yellow = true;
+uniform bool Black = true;
+
+uniform float angle_cyan    = 15.0;
+uniform float angle_magenta = 75.0;
+uniform float angle_yellow  =  0.0;
+uniform float angle_black   = 45.0;
+
+
+mat2 rotate2d(float angle){
+    return mat2(vec2(cos(angle),-sin(angle)),
+                vec2(sin(angle), cos(angle)));
 }
 
 vec2 point_to_screen_UV(vec2 point, vec2 current_position, vec2 scr_pixel_size, vec2 fragcoord) {
@@ -24,49 +35,47 @@ vec2 get_rotated_grid_cell_center(vec2 position, float deg, vec2 texture_size) {
 	return cell_center;
 }
 
-vec3 CMYK(vec2 position, vec2 texture_size, vec2 screen_pixel_size, sampler2D screen_texture, vec2 fragcoord) {
-	vec3 color = vec3(0.0);
-	float scaled_dot_size = dot_size * grid_size / 2.0;
-	
-	vec2 cell_center = get_rotated_grid_cell_center(position, 15.0, texture_size);
-	vec3 RGB = textureLod(screen_texture, point_to_screen_UV(cell_center, position, screen_pixel_size, fragcoord), blur_level).rgb;
-	float C = 1.0 - RGB.r;
-	
-	if (distance(position, cell_center) < (scaled_dot_size * C)) {
-		color.r = 1.0;
-	}
-	
-	cell_center = get_rotated_grid_cell_center(position, 75.0, texture_size);
-	RGB = textureLod(screen_texture, point_to_screen_UV(cell_center, position, screen_pixel_size, fragcoord), blur_level).rgb;
-	float M = 1.0 - RGB.g;
-
-	if (distance(position, cell_center) < (scaled_dot_size * M)) {
-		color.g = 1.0;
-	}
-	
-	cell_center = get_rotated_grid_cell_center(position, 0.0, texture_size);
-	RGB = textureLod(screen_texture, point_to_screen_UV(cell_center, position, screen_pixel_size, fragcoord), blur_level).rgb;
-	float Y = 1.0 - RGB.b;
-	
-	if (distance(position, cell_center) < (scaled_dot_size * Y)) {
-		color.b = 1.0;
-	}
-	
-	color = vec3(1.0) - color;
-	
-	cell_center = get_rotated_grid_cell_center(position, 45.0, texture_size);
-	RGB = textureLod(screen_texture, point_to_screen_UV(cell_center, position, screen_pixel_size, fragcoord), blur_level).rgb;
-	float K = 1.0 - max(RGB.r, max(RGB.g, RGB.b));
-	
-	if (distance(position, cell_center) < (scaled_dot_size * K)) {
-		color = vec3(0.0);
-	}
-	
-	return color;
-}
-
 void fragment() {
 	vec2 position = UV / TEXTURE_PIXEL_SIZE;
-
-	COLOR = vec4(CMYK(position, 1.0/TEXTURE_PIXEL_SIZE, SCREEN_PIXEL_SIZE, SCREEN_TEXTURE, FRAGCOORD.xy), 1.0);
+	
+	COLOR = vec4(0.0);
+	float scaled_dot_size = dot_size * grid_size / 2.0;
+	
+	vec2 cell_center;
+	vec3 RGB;
+	
+	if (Cyan) {
+		cell_center = get_rotated_grid_cell_center(position, angle_cyan, 1.0/TEXTURE_PIXEL_SIZE);
+		RGB = textureLod(SCREEN_TEXTURE, point_to_screen_UV(cell_center, position, SCREEN_PIXEL_SIZE, FRAGCOORD.xy), blur_level).rgb;
+		if (distance(position, cell_center) < (scaled_dot_size * (1.0 - RGB.r))) {
+			COLOR.r = 1.0;
+		}
+	}
+	
+	if (Magenta) {
+		cell_center = get_rotated_grid_cell_center(position, angle_magenta, 1.0/TEXTURE_PIXEL_SIZE);
+		RGB = textureLod(SCREEN_TEXTURE, point_to_screen_UV(cell_center, position, SCREEN_PIXEL_SIZE, FRAGCOORD.xy), blur_level).rgb;
+		if (distance(position, cell_center) < (scaled_dot_size * (1.0 - RGB.g))) {
+			COLOR.g = 1.0;
+		}
+	}
+	
+	if (Yellow) {
+		cell_center = get_rotated_grid_cell_center(position, angle_yellow, 1.0/TEXTURE_PIXEL_SIZE);
+		RGB = textureLod(SCREEN_TEXTURE, point_to_screen_UV(cell_center, position, SCREEN_PIXEL_SIZE, FRAGCOORD.xy), blur_level).rgb;
+		if (distance(position, cell_center) < (scaled_dot_size * (1.0 - RGB.b))) {
+			COLOR.b = 1.0;
+		}
+	}
+	
+	if (Black) {
+		cell_center = get_rotated_grid_cell_center(position, angle_black, 1.0/TEXTURE_PIXEL_SIZE);
+		RGB = textureLod(SCREEN_TEXTURE, point_to_screen_UV(cell_center, position, SCREEN_PIXEL_SIZE, FRAGCOORD.xy), blur_level).rgb;
+		if (distance(position, cell_center) < (scaled_dot_size * (1.0 - max(RGB.r, max(RGB.g, RGB.b))))) {
+			COLOR.rgb = vec3(1.0);
+		}
+	}
+	
+	// Convert to CMYK
+	COLOR = vec4(1.0 - COLOR.rgb, 1.0);
 }
