@@ -1,17 +1,25 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://CMYK.shader" type="Shader" id=1]
+[ext_resource path="res://CMYK_Blob.shader" type="Shader" id=1]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 1 )
 shader_param/grid_size = 2.0
 shader_param/blur_level = 0.0
 shader_param/dot_size = 1.0
+shader_param/blob_enabled = true
+shader_param/Cyan = true
+shader_param/Magenta = true
+shader_param/Yellow = true
+shader_param/Black = true
+shader_param/angle_cyan = 15.0
+shader_param/angle_magenta = 75.0
+shader_param/angle_yellow = 0.0
+shader_param/angle_black = 45.0
 
 [sub_resource type="ImageTexture" id=2]
-size = Vector2( 500, 500 )
+size = Vector2( 512, 512 )
 
 [node name="Filter" type="Sprite"]
 material = SubResource( 1 )
-position = Vector2( 97.7114, 149.069 )
 texture = SubResource( 2 )
