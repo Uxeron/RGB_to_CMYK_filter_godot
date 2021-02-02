@@ -1,4 +1,17 @@
 # RGB_to_CMYK_filter_godot
-A filter for godot that converts whatever image is below it to look like it's made with a CMYK printer
+A real-time, shader-based filter for godot that makes whatever is below it look like it's made with a CMYK printer.
 
-Note: If using larger grid sizes, increase blur too. For example, for grid size 50, use Blur level 3-4
+Has a "blobbing" mode, which makes nearby dots connect like blobs of ink.
+
+
+Without filter:
+
+![alt text](https://raw.githubusercontent.com/Uxeron/RGB_to_CMYK_filter_godot/master/monarch.png)
+
+With filter:
+
+![alt text](https://raw.githubusercontent.com/Uxeron/RGB_to_CMYK_filter_godot/master/monarch_filter.png)
+
+With filter and blobbing:
+
+![alt text](https://raw.githubusercontent.com/Uxeron/RGB_to_CMYK_filter_godot/master/monarch_blobbed.png)
